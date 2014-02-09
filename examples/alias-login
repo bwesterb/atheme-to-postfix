@@ -1,0 +1,3 @@
+#!/bin/bash
+
+python2 /path/to/atheme-to-postfix/atheme-to-postfix.py -d /home/user/nick-email.db -D example.com
