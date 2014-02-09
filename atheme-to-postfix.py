@@ -30,8 +30,9 @@ class Program:
         self.args = parser.parse_args()
 
     def __init__(self):
-        self.email_re = re.compile(r'^[a-z0-9\.]+@[a-z0-9\.]+\.[a-z0-9\.]+$')
-        self.nick_re = re.compile(r'^[a-z0-9]+$')
+        self.email_re = re.compile(
+                r'^[a-z0-9\-_\.]+@[a-z\-0-9\.]+\.[a-z0-9\.]+$')
+        self.nick_re = re.compile(r'^[a-z0-9_\-]+$')
 
     def main(self, argv):
         self.parse_args(argv)
