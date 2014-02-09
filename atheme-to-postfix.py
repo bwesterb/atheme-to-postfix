@@ -41,32 +41,65 @@ class Program:
 
     def load_services_db(self):
         nicks = {}
+        aliases = {}
+        # First, read the database
         with open(self.args.db) as f:
             for lineno, l in enumerate(f):
                 bits = l.split(' ', 5)
                 if not bits:
                     print '# WARNING l.%s empty line' % lineno
                     continue
-                if bits[0] != 'MU':
+                if bits[0] == 'MU':
+                    # This is a nickname registration line
+                    if len(bits) != 6:
+                        print '# WARNING l.%s missing fields' % lineno
+                        continue
+                    nick = bits[2].lower()
+                    email = bits[4].lower()
+                    if not self.nick_re.match(nick):
+                        print '# WARNING l.%s invalid nick %s' % (
+                                lineno, repr(nick))
+                        continue
+                    if not self.email_re.match(email):
+                        print '# WARNING l.%s invalid email %s' % (
+                                lineno, repr(email))
+                        continue
+                    if nick in nicks:
+                        print '# WARNING l.%s double nick %s' % (
+                                lineno, nick)
+                        continue
+                    nicks[nick] = email
+                elif bits[0] == 'MN':
+                    # This is an alias registration line
+                    if len(bits) != 4:
+                        print '# WARNING l.%s missing fields' % lineno
+                        continue
+                    target_nick = bits[2].lower()
+                    source_nick = bits[3].lower()
+                    if source_nick == target_nick:
+                        continue
+                    if not self.nick_re.match(source_nick):
+                        print '# WARNING l.%s invalid nick %s' % (
+                                    lineno, repr(source_nick))
+                        continue
+                    if not self.nick_re.match(target_nick):
+                        print '# WARNING l.%s invalid nick %s' % (
+                                    lineno, repr(target_nick))
+                        continue
+                    if not target_nick in aliases:
+                        aliases[target_nick] = []
+                    aliases[target_nick].append(source_nick)
+        # Now, resolve aliases
+        for target_nick, source_nicks in aliases.iteritems():
+            if not target_nick in nicks:
+                print '# WARNING no target nick %s referenced from %s' % (
+                                target_nick, source_nicks)
+                continue
+            for source_nick in source_nicks:
+                if source_nick in nicks:
+                    print '# WARNING double nick %s' % source_nick
                     continue
-                if len(bits) != 6:
-                    print '# WARNING l.%s missing fields' % lineno
-                    continue
-                nick = bits[2].lower()
-                email = bits[4].lower()
-                if not self.nick_re.match(nick):
-                    print '# WARNING l.%s invalid nick %s' % (
-                            lineno, repr(nick))
-                    continue
-                if not self.email_re.match(email):
-                    print '# WARNING l.%s invalid email %s' % (
-                            lineno, repr(email))
-                    continue
-                if nick in nicks:
-                    print '# WARNING l.%s double nick %s' % (
-                            lineno, nick)
-                    continue
-                nicks[nick] = email
+                nicks[source_nick] = target_nick
         return nicks
 
     def print_map(self, nicks):
