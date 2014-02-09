@@ -71,7 +71,7 @@ class Program:
                     nicks[nick] = email
                 elif bits[0] == 'MN':
                     # This is an alias registration line
-                    if len(bits) != 5:
+                    if len(bits) != 6:
                         print '# WARNING l.%s missing fields' % lineno
                         continue
                     source_nick = bits[2].lower()
