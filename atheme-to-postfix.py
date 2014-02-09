@@ -71,11 +71,11 @@ class Program:
                     nicks[nick] = email
                 elif bits[0] == 'MN':
                     # This is an alias registration line
-                    if len(bits) != 4:
+                    if len(bits) != 5:
                         print '# WARNING l.%s missing fields' % lineno
                         continue
-                    target_nick = bits[2].lower()
-                    source_nick = bits[3].lower()
+                    source_nick = bits[2].lower()
+                    target_nick = bits[1].lower()
                     if source_nick == target_nick:
                         continue
                     if not self.nick_re.match(source_nick):
@@ -99,7 +99,7 @@ class Program:
                 if source_nick in nicks:
                     print '# WARNING double nick %s' % source_nick
                     continue
-                nicks[source_nick] = target_nick
+                nicks[source_nick] = '%s@%s' % (target_nick, self.args.domain)
         return nicks
 
     def print_map(self, nicks):
